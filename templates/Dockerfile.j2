@@ -1,0 +1,10 @@
+FROM {{build_image}} AS builder
+
+RUN xcaddy build \
+{% for module in modules %}
+    --with {{module}}
+{% endfor %}
+
+FROM {{base_image}}
+
+COPY --from=builder /usr/bin/caddy /usr/bin/caddy
