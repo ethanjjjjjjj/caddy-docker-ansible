@@ -1,3 +1,3 @@
-Quick ansible role to build and run a Caddy contianer which includes the Dloudflare DNS module.
+Quick ansible role to build and run a Caddy container which includes the Cloudflare DNS module.
 
-Modules are configurable under vars/main.yaml
+Modules are configurable under vars/main.yaml and Caddyfile is placed under files/Caddyfile
