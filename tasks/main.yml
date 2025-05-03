@@ -1,48 +1,45 @@
 ---
 # tasks file for roles/caddy-build-and-run-docker
-- name: pull caddy build image
+- name: Pull caddy build image
   community.docker.docker_image:
     name: caddy:builder
     source: pull
-- name: create build dir
+- name: Create build dir
   ansible.builtin.file:
     path: /root/dockerbuild
     state: directory
-- name: template dockerfile
+    mode: u=rwx,g,o
+- name: Template dockerfile
   ansible.builtin.template:
-    src: "{{role_path}}/templates/Dockerfile.j2"
+    src: "{{ role_path }}/templates/Dockerfile.j2"
     dest: /root/dockerbuild/Dockerfile
-- name: build image with modules
+    mode: u=rw,g,o
+- name: Build image with modules
   community.docker.docker_image_build:
-    name: "{{image_name}}"
+    name: "{{ image_name }}"
     tag: latest
     dockerfile: Dockerfile
     path: /root/dockerbuild/
-- name: run caddy container
+- name: Run caddy container
   community.docker.docker_container:
     name: caddy
-    image: "{{image_name}}"
+    image: "{{ image_name }}"
     network_mode: host
     restart_policy: "unless-stopped"
     env:
-      cloudflare_api_key: "{{cloudflare_key}}"
+      cloudflare_api_key: "{{ cloudflare_key }}"
     state: present
-- name: copy Caddyfile to host
-  ansible.builtin.copy:
-    src: "{{role_path}}/files/Caddyfile"
+- name: Copy Caddyfile to host
+  ansible.builtin.template:
+    src: "{{caddyfile}}"
     dest: /root/Caddyfile
-- name: copy Caddyfile
+    mode: u=rw,g,o
+- name: Copy Caddyfile
   community.docker.docker_container_copy_into:
     container: caddy
     path: /root/Caddyfile
     container_path: /etc/caddy/Caddyfile
-    mode: 0644
     owner_id: 0
     group_id: 0
   register: copy_config_result
-- name: restart container if config changed
-  when: copy_config_result.changed
-  throttle: 1
-  community.docker.docker_container:
-    name: caddy
-    restart: true
+  notify: Restart container if config changed
