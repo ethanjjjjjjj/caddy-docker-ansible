@@ -30,8 +30,8 @@
       cloudflare_api_key: "{{ cloudflare_key }}"
     state: present
 - name: Copy Caddyfile to host
-  ansible.builtin.template:
-    src: "{{caddyfile}}"
+  ansible.builtin.copy:
+    content: "{{ caddyfile }}"
     dest: /root/Caddyfile
     mode: u=rw,g,o
 - name: Copy Caddyfile
@@ -42,4 +42,4 @@
     owner_id: 0
     group_id: 0
   register: copy_config_result
-  notify: Restart container if config changed
+  notify: restart-caddy-container
