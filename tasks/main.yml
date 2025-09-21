@@ -42,4 +42,4 @@
     owner_id: 0
     group_id: 0
   register: copy_config_result
-  notify: restart-caddy-container
+  notify: Reload_caddy_service
