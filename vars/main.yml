@@ -1,7 +1,2 @@
 ---
 # vars file for roles/caddy-build-and-run-docker
-build_image: caddy:builder
-base_image: caddy:latest
-image_name: localhost/caddy-cloudflare
-modules:
-- github.com/caddy-dns/cloudflare

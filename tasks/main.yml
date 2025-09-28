@@ -17,18 +17,25 @@
 - name: Build image with modules
   community.docker.docker_image_build:
     name: "{{ image_name }}"
-    tag: latest
+    tag: "{{image_tag}}"
     dockerfile: Dockerfile
     path: /root/dockerbuild/
+- name: Create data volume
+  community.docker.docker_volume:
+    name: caddy_data
 - name: Run caddy container
   community.docker.docker_container:
     name: caddy
-    image: "{{ image_name }}"
+    image: "{{ image_name }}:{{ image_tag }}"
+    image_name_mismatch: recreate
     network_mode: host
     restart_policy: "unless-stopped"
     env:
       cloudflare_api_key: "{{ cloudflare_key }}"
-    state: present
+    volumes:
+      - caddy_data:/data:rw
+      - caddy_config:/config:rw
+    state: started
 - name: Copy Caddyfile to host
   ansible.builtin.copy:
     content: "{{ caddyfile }}"
