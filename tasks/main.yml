@@ -23,6 +23,13 @@
 - name: Create data volume
   community.docker.docker_volume:
     name: caddy_data
+- name: Copy Caddyfile to host
+  ansible.builtin.copy:
+    content: "{{ caddyfile }}"
+    dest: /root/Caddyfile
+    mode: u=rw,g,o
+  register: copy_config_result
+  notify: Reload_caddy_service
 - name: Run caddy container
   community.docker.docker_container:
     name: caddy
@@ -35,18 +42,8 @@
     volumes:
       - caddy_data:/data:rw
       - caddy_config:/config:rw
-    state: started
-- name: Copy Caddyfile to host
-  ansible.builtin.copy:
-    content: "{{ caddyfile }}"
-    dest: /root/Caddyfile
-    mode: u=rw,g,o
-- name: Copy Caddyfile
-  community.docker.docker_container_copy_into:
-    container: caddy
-    path: /root/Caddyfile
-    container_path: /etc/caddy/Caddyfile
-    owner_id: 0
-    group_id: 0
-  register: copy_config_result
-  notify: Reload_caddy_service
+    mounts:
+      - read_only: true
+        source: /root/Caddyfile
+        target: /etc/caddy/Caddyfile
+        type: bind
